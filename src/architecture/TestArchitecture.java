@@ -73,7 +73,7 @@ public class TestArchitecture {
     arch.getExtbus().put(109);
     arch.getRegistersList().get(1).store(); //RPG1 has 99
 
-    // MOVE %reg1 %reg0
+    // MOVE %rpg1 %rpg0
     arch.moveRegReg();
 
     // testing if both REG1 and REG0 store the same value: 99

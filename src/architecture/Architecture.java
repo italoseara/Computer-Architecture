@@ -1,17 +1,15 @@
 package architecture;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
-
-
 import components.Bus;
 import components.Demux;
 import components.Memory;
 import components.Register;
 import components.Ula;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Architecture {
 
@@ -452,7 +450,8 @@ public class Architecture {
 
     // Read the register id from the memory
     memory.read();
-    ula.store(0); // ????????????? for some reason the ula changes the value of the extbus, so we need to store it
+    ula.store(
+        0); // ????????????? for some reason the ula changes the value of the extbus, so we need to store it
 
     // Increment PC to point to the second register
     PC.internalRead();

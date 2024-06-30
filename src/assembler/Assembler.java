@@ -1,5 +1,7 @@
 package assembler;
 
+import architecture.Architecture;
+import components.Register;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,19 +9,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import components.Register;
-import architecture.Architecture;
 
 public class Assembler {
 
   private ArrayList<String> lines;
-  private ArrayList<String> objProgram;
+  private final ArrayList<String> objProgram;
   private ArrayList<String> execProgram;
-  private Architecture arch;
-  private ArrayList<String> commands;
-  private ArrayList<String> labels;
-  private ArrayList<Integer> labelsAdresses;
-  private ArrayList<String> variables;
+  private final Architecture arch;
+  private final ArrayList<String> commands;
+  private final ArrayList<String> labels;
+  private final ArrayList<Integer> labelsAdresses;
+  private final ArrayList<String> variables;
 
 
   public Assembler() {
@@ -34,6 +34,17 @@ public class Assembler {
   }
 
   //getters
+
+  public static void main(String[] args) throws IOException {
+    String filename = args[0];
+    Assembler assembler = new Assembler();
+    System.out.println("Reading source assembler file: " + filename + ".dsf");
+    assembler.read(filename);
+    System.out.println("Generating the object program");
+    assembler.parse();
+    System.out.println("Generating executable: " + filename + ".dxf");
+    assembler.makeExecutable(filename);
+  }
 
   public ArrayList<String> getObjProgram() {
     return objProgram;
@@ -59,10 +70,6 @@ public class Assembler {
     return execProgram;
   }
 
-  protected void setLines(ArrayList<String> lines) {
-    this.lines = lines;
-  }
-
   protected void setExecProgram(ArrayList<String> lines) {
     this.execProgram = lines;
   }
@@ -83,6 +90,9 @@ public class Assembler {
    * 		The executable file must have the extention .dxf
    */
 
+  protected void setLines(ArrayList<String> lines) {
+    this.lines = lines;
+  }
 
   /**
    * This method reads an entire file in assembly
@@ -99,7 +109,6 @@ public class Assembler {
     br.close();
 
   }
-
 
   /**
    * This method scans the strings in lines
@@ -124,7 +133,6 @@ public class Assembler {
     }
 
   }
-
 
   /**
    * This method processes a command, putting it and its parameters (if they have)
@@ -183,7 +191,6 @@ public class Assembler {
       objProgram.add(parameter2);
     }
   }
-
 
   /**
    * This method uses the tokens to search a command
@@ -255,7 +262,7 @@ public class Assembler {
     int p = 0;
     for (String line : execProgram) {
       if (line.startsWith("%")) { //this line is a register
-        line = line.substring(1, line.length());
+        line = line.substring(1);
         int regId = searchRegisterId(line, arch.getRegistersList());
         String newLine = Integer.toString(regId);
         execProgram.set(p, newLine);
@@ -347,7 +354,7 @@ public class Assembler {
     for (String line : objProgram) {
       boolean found = false;
       if (line.startsWith("&")) { //if starts with "&", it is a label or a variable
-        line = line.substring(1, line.length());
+        line = line.substring(1);
         if (labels.contains(line)) {
           found = true;
         }
@@ -380,17 +387,6 @@ public class Assembler {
       i++;
     }
     return -1;
-  }
-
-  public static void main(String[] args) throws IOException {
-    String filename = args[0];
-    Assembler assembler = new Assembler();
-    System.out.println("Reading source assembler file: " + filename + ".dsf");
-    assembler.read(filename);
-    System.out.println("Generating the object program");
-    assembler.parse();
-    System.out.println("Generating executable: " + filename + ".dxf");
-    assembler.makeExecutable(filename);
   }
 
 }
