@@ -501,10 +501,69 @@ public class Architecture {
    * The method reads the immediate value and the register id from the memory, in positions just after the command, and
    * moves the immediate value to the register
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the immediate value)
+   * 7. memory <- extbus // sets the extbus value to the immediate value
+   * 8. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 9. pc -> intbus
+   * 10. ula(1) <- intbus
+   * 11. ula.inc
+   * 12. ula(1) -> intbus
+   * 13. ula(1) -> extbus
+   * 14. pc <- intbus // pc++ (pointing to the register)
+   * 15. memory <- extbus // sets the extbus value to the id of the register
+   * 16. demux <- extbus // sets the demux value to the id of the register
+   * 17. ula(0) -> extbus // moves the value from the ula to the extbus
+   * 18. registers <- extbus // this performs the internal writing of the selected register
+   * 19. pc -> intbus
+   * 20. ula(1) <- intbus
+   * 21. ula.inc
+   * 22. ula(1) -> intbus
+   * 23. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void moveImmReg() {
+    // Increment PC to point to the immediate value
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the immediate value from the memory
+    memory.read();
+    ula.store(0); // storing the immediate value in the ula
+
+    // Increment PC to point to the register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the register id from the memory
+    memory.read();
+
+    // Select the register
+    demux.setValue(extbus.get());
+
+    // Move the immediate value that was stored in the ula to the extbus
+    ula.read(0);
+
+    // Write the value from the ula to the selected register
+    registersStore();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
