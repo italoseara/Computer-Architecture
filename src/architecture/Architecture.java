@@ -635,10 +635,59 @@ public class Architecture {
    * The method reads the register id from the memory, in positions just after the command, and
    * increments the value from the register
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the register)
+   * 7. memory -> extbus // sets the extbus value to the id of the register
+   * 8. demux <- extbus // sets the demux value to the id of the register
+   * 9. registers -> extbus // this performs the internal reading of the selected register
+   * 10. ula(1) <- extbus // Save the value of the selected register in the ula
+   * 11. ula.inc // increment the value in the ula
+   * 12. ula(1) -> extbus // moves the value from the ula to the extbus
+   * 13. registers <- extbus // this performs the internal writing of the selected register
+   * 14. pc -> intbus
+   * 15. ula(1) <- intbus
+   * 16. ula.inc
+   * 17. ula(1) -> intbus
+   * 18. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void incReg() {
+    // Increment PC to point to the register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the register id from the memory
+    memory.read();
+
+    // Select the register
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Save the value of the selected register in the ula
+    ula.store(1);
+
+    // Increment the value in the ula
+    ula.inc();
+
+    // Move the value from the ula to the extbus
+    ula.read(1);
+
+    // Write the value from the ula to the selected register
+    registersStore();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
