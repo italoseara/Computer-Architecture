@@ -10,7 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
+//teste de branch
 public class Architecture {
 
   private final boolean simulation;
