@@ -25,10 +25,10 @@ public class TestArchitecture {
     arch.getExtbus().put(77);
     arch.getRegistersList().get(0).store(); // RPG0 has 77
 
-    // MOVE %rpg0 31
+    // MOVE %rpg0 100
     arch.moveRegMem();
 
-    // Testing if memory position 31 stores the value 77
+    // Testing if memory position 100 stores the value 77
     assertEquals(77, arch.getMemory().getDataList()[100]);
     // Testing if RPG0 stores the value 77
     arch.getRegistersList().get(0).read();
@@ -119,6 +119,30 @@ public class TestArchitecture {
     // Testing if RPG0 stores the value 78
     arch.getRegistersList().get(0).read();
     assertEquals(78, arch.getExtbus().get());
+
+    // Testing if PC points to 2 positions after the original
+    // PC was pointing to 30; now it must be pointing to 32
+    arch.getPC().internalRead();
+    assertEquals(32, arch.getIntbus().get());
+  }
+
+  @Test
+  public void testIncMem() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+    arch.getMemory().getDataList()[100] = 2000;
+
+    // INC 100
+    arch.incMem();
+
+    // Testing if memory position 100 stores the value 2001
+    assertEquals(2001, arch.getMemory().getDataList()[100]);
 
     // Testing if PC points to 2 positions after the original
     // PC was pointing to 30; now it must be pointing to 32

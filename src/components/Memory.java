@@ -64,4 +64,7 @@ public class Memory {
 		this.dataList[1] = bus.get();
 	}
 
+	public int getStorePosition() {
+		return storePosition;
+	}
 }

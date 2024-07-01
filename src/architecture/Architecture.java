@@ -698,10 +698,59 @@ public class Architecture {
    * The method reads the memory position from the memory, in positions just after the command, and
    * increments the value from the memory position
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // sets the extbus value to the memory position
+   * 8. memory <- extbus // sends the memory position and waits for the value
+   * 9. memory -> extbus // sets the extbus value to the memory position
+   * 10. ula(1) <- extbus // moves the value from the memory to the ula
+   * 11. ula.inc // increment the value in the ula
+   * 12. ula(1) -> extbus // moves the value from the ula to the extbus
+   * 13. memory <- extbus // sends the value to the memory and stores it in the memory position
+   * 14. pc -> intbus
+   * 15. ula(1) <- intbus
+   * 16. ula.inc
+   * 17. ula(1) -> intbus
+   * 18. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void incMem() {
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the memory position from the memory
+    memory.read();
+    memory.store();
+
+    // Read the value from the memory position
+    memory.read();
+
+    // Move the value from the memory to the ula
+    ula.store(1);
+
+    // Increment the value in the ula
+    ula.inc();
+
+    // Move the value from the ula to the extbus
+    ula.read(1);
+
+    // Write the value from the ula to the memory
+    memory.store();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
