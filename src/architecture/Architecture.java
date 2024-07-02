@@ -368,7 +368,7 @@ public class Architecture {
    * The method reads the two register ids (<reg1> and <reg2>) from the memory, in positions just after the command, and
    * multiplies the value from the <reg1> register to the <reg2> register
    * <p>
-   * 1.
+   *
    */
   public void imulRegReg() {
       /*
