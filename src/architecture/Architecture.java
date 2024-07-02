@@ -341,8 +341,9 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void imulMemReg() {
-
+  public void imulMemReg()
+  {
+      /*This function implements multiplication between two numbers*/
   }
 
   /**
@@ -370,6 +371,16 @@ public class Architecture {
    * 1.
    */
   public void imulRegReg() {
+      /*
+      this function implements multiplication with two registers
+      * */
+    // Increment PC to point to the first register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
   }
 
