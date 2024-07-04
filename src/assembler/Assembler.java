@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Assembler {
   private ArrayList<String> lines;
@@ -32,17 +33,6 @@ public class Assembler {
   }
 
   //getters
-
-  public static void main(String[] args) throws IOException {
-    String filename = args[0];
-    Assembler assembler = new Assembler();
-    System.out.println("Reading source assembler file: " + filename + ".dsf");
-    assembler.read(filename);
-    System.out.println("Generating the object program");
-    assembler.parse();
-    System.out.println("Generating executable: " + filename + ".dxf");
-    assembler.makeExecutable(filename);
-  }
 
   public ArrayList<String> getObjProgram() {
     return objProgram;
@@ -129,7 +119,6 @@ public class Assembler {
         }
       }
     }
-
   }
 
   /**
@@ -144,12 +133,6 @@ public class Assembler {
     String parameter2 = tokens.length > 2 ? tokens[2] : "";
     String parameter3 = tokens.length > 3 ? tokens[3] : "";
     int commandNumber = findCommandNumber(tokens);
-
-    System.out.println("Command: " + command);
-    System.out.println("Parameter: " + parameter);
-    System.out.println("Parameter2: " + parameter2);
-    System.out.println("Parameter3: " + parameter3);
-    System.out.println("Command number: " + commandNumber);
 
     objProgram.add(Integer.toString(commandNumber));
     if (!parameter.isEmpty()) {
@@ -369,7 +352,6 @@ public class Assembler {
     }
     writer.write("-1"); //-1 is a flag indicating that the program is finished
     writer.close();
-
   }
 
   /**
@@ -399,7 +381,7 @@ public class Assembler {
    * name found in the object program by his address
    * in the executable program
    *
-   * @param var the variable name
+   * @param var      the variable name
    * @param position the address of the variable
    */
   protected void replaceVariable(String var, int position) {
@@ -444,7 +426,7 @@ public class Assembler {
    * This method searches for a register in the architecture register list
    * by the register name
    *
-   * @param line the register name
+   * @param line          the register name
    * @param registersList the list of registers
    * @return the register id
    */
@@ -457,5 +439,16 @@ public class Assembler {
       i++;
     }
     return -1;
+  }
+
+  public static void main(String[] args) throws IOException {
+    String filename = "program";
+    Assembler assembler = new Assembler();
+    System.out.println("Reading source assembler file: " + filename + ".dsf");
+    assembler.read(filename);
+    System.out.println("Generating the object program");
+    assembler.parse();
+    System.out.println("Generating executable: " + filename + ".dxf");
+    assembler.makeExecutable(filename);
   }
 }

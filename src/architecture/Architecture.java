@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 //teste de branch
@@ -1893,7 +1894,9 @@ public class Architecture {
    * NOT TESTED!
    */
   private void fetch() {
-    PC.read();
+    PC.internalRead();
+    ula.internalStore(0);
+    ula.read(0);
     memory.read();
     IR.store();
     simulationFetch();
