@@ -225,7 +225,7 @@ public class Architecture {
     commandsList.add("jn");        // 16 ✓
     commandsList.add("jz");        // 17 ✓
     commandsList.add("jnz");       // 18 ✓
-    commandsList.add("jeq");       // 19
+    commandsList.add("jeq");       // 19 ✓
 
     commandsList.add("jgt"); // 20 Italo
     commandsList.add("jlw"); // 21 Italo
@@ -1426,8 +1426,76 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void jeqRegRegMem() {
+  public void jeq() {
+    // Increment PC to point to the first register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the first register id from the memory
+    memory.read();
+
+    // Select the first register and read it
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Wait for the value of the second register
+    ula.store(0);
+
+    // Increment PC to point to the second register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the second register id from the memory
+    memory.read();
+
+    // Select the second register and read it
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Save the value of the second register in the ula
+    ula.store(1);
+
+    // Subtracts the value of the first register to the value of the second register
+    ula.sub();
+    ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
+
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the memory position from the memory
+    memory.read();
+
+    statusMemory.storeIn1();
+
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    statusMemory.storeIn0();
+
+    extbus.put(flags.getBit(0));
+    statusMemory.read();
+
+    ula.store(0);
+    ula.internalRead(0);
+    PC.internalStore();
   }
 
   /**
@@ -1440,8 +1508,84 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void jgtRegRegMem() {
+  public void jgt() {
+    // Increment PC to point to the first register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the first register id from the memory
+    memory.read();
+
+    // Select the first register and read it
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Wait for the value of the second register
+    ula.store(0);
+
+    // Increment PC to point to the second register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the second register id from the memory
+    memory.read();
+
+    // Select the second register and read it
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Save the value of the second register in the ula
+    ula.store(1);
+
+    // Subtracts the value of the first register to the value of the second register
+    ula.sub();
+    ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
+
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the memory position from the memory
+    memory.read();
+
+    statusMemory.storeIn1();
+
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    statusMemory.storeIn0();
+
+    // Check if it > and not >=
+    extbus.put(flags.getBit(1));
+    ula.store(0);
+    extbus.put(flags.getBit(0));
+    ula.store(1);
+    ula.sub(); // If the result is 0, the first register is greater than the second and not equal
+    ula.read(1);
+    setStatusFlags(extbus.get());
+    extbus.put(flags.getBit(0));
+    statusMemory.read();
+
+    ula.store(0);
+    ula.internalRead(0);
+    PC.internalStore();
   }
 
   /**
@@ -1454,7 +1598,7 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void jlwRegRegMem() {
+  public void jlw() {
 
   }
 
@@ -1593,13 +1737,13 @@ public class Architecture {
         jnz();
         break;
       case 19:
-        jeqRegRegMem();
+        jeq();
         break;
       case 20:
-        jgtRegRegMem();
+        jgt();
         break;
       case 21:
-        jlwRegRegMem();
+        jlw();
         break;
       default:
         halt = true;
