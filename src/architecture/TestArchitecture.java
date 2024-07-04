@@ -7,9 +7,119 @@ import org.junit.Test;
 public class TestArchitecture {
 
   @Test
-  public void testSubRegMem()
-  {
-    Architecture arch =  new Architecture();
+  public void testJn() {
+    Architecture arch = new Architecture();
+
+    // Simulate an operation
+    arch.setStatusFlags(-1);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JN 100
+    arch.jn();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
+
+    // Simulate an operation
+    arch.setStatusFlags(1);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JN 100
+    arch.jn();
+
+    // Testing if PC points to position 100
+    assertEquals(32, arch.getPC().getData());
+  }
+
+  @Test
+  public void testJz() {
+    Architecture arch = new Architecture();
+
+    // Simulate an operation
+    arch.setStatusFlags(0);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JZ 100
+    arch.jz();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
+
+    // Simulate an operation
+    arch.setStatusFlags(1);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JZ 100
+    arch.jz();
+
+    // Testing if PC points to position 100
+    assertEquals(32, arch.getPC().getData());
+  }
+
+  @Test
+  public void testJnz() {
+    Architecture arch = new Architecture();
+
+    // Simulate an operation
+    arch.setStatusFlags(1);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JN 100
+    arch.jnz();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
+
+    // Simulate an operation
+    arch.setStatusFlags(0);
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JN 100
+    arch.jnz();
+
+    // Testing if PC points to position 100
+    assertEquals(32, arch.getPC().getData());
+  }
+
+  @Test
+  public void testSubRegMem() {
+    Architecture arch = new Architecture();
     // making PC points to position 30
     arch.getIntbus().put(30);
     arch.getPC().internalStore();
@@ -193,9 +303,12 @@ public class TestArchitecture {
     arch.getPC().internalStore();
 
     // setting the memory values
-    arch.getMemory().getDataList()[31] = 100; // in the fist position we have 100 that's the address we want to move value of the register to memory
-    arch.getMemory().getDataList()[32] = 0; // in the second position we have address  that's register id
-    arch.getMemory().getDataList()[100] = 2000; //in third position we have the value that we want to move to memory
+    arch.getMemory().getDataList()[31] =
+        100; // in the fist position we have 100 that's the address we want to move value of the register to memory
+    arch.getMemory().getDataList()[32] =
+        0; // in the second position we have address  that's register id
+    arch.getMemory().getDataList()[100] =
+        2000; //in third position we have the value that we want to move to memory
 
     // MOVE &100 %rpg0
     arch.moveMemReg();

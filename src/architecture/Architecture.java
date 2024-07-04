@@ -222,9 +222,9 @@ public class Architecture {
 
     // Luige
     commandsList.add("jmp");       // 15 ✓
-    commandsList.add("jn");        // 16
-    commandsList.add("jz");        // 17
-    commandsList.add("jnz");       // 18
+    commandsList.add("jn");        // 16 ✓
+    commandsList.add("jz");        // 17 ✓
+    commandsList.add("jnz");       // 18 ✓
     commandsList.add("jeq");       // 19
 
     commandsList.add("jgt"); // 20 Italo
@@ -237,7 +237,7 @@ public class Architecture {
    * @param result is the result of the operation
    *               NOT TESTED!!!!!!!
    */
-  private void setStatusFlags(int result) {
+  public void setStatusFlags(int result) {
     flags.setBit(0, 0);
     flags.setBit(1, 0);
     if (result == 0) { // bit 0 in flags must be 1 in this case
@@ -338,6 +338,7 @@ public class Architecture {
     demux.setValue(extbus.get());
     ula.read(1);
     registersStore();
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Increment PC to point to the next command
     PC.internalRead();
@@ -433,6 +434,7 @@ public class Architecture {
     demux.setValue(extbus.get());
     ula.read(1);
     registersStore();
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Increment PC to point to the next command
     PC.internalRead();
@@ -502,6 +504,7 @@ public class Architecture {
     ula.store(1);
     ula.add();
     ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
     memory.store();
     PC.internalRead();
     ula.internalStore(1);
@@ -601,6 +604,7 @@ public class Architecture {
     demux.setValue(extbus.get());
     ula.read(1);
     registersStore();
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Increment PC to point to the next command
     PC.internalRead();
@@ -696,6 +700,7 @@ public class Architecture {
     demux.setValue(extbus.get());
     ula.read(1);
     registersStore();
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Increment PC to point to the next command
     PC.internalRead();
@@ -765,6 +770,7 @@ public class Architecture {
     ula.store(1);
     ula.sub();
     ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
     memory.store();
     PC.internalRead();
     ula.internalStore(1);
@@ -1186,6 +1192,7 @@ public class Architecture {
 
     // Move the value from the ula to the extbus
     ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Write the value from the ula to the selected register
     registersStore();
@@ -1249,6 +1256,7 @@ public class Architecture {
 
     // Move the value from the ula to the extbus
     ula.read(1);
+    setStatusFlags(extbus.get()); // Set the flags according the result
 
     // Write the value from the ula to the memory
     memory.store();
@@ -1305,7 +1313,31 @@ public class Architecture {
    * 1.
    */
   public void jn() {
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    memory.read();
+    statusMemory.storeIn1();
+
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+    statusMemory.storeIn0();
+
+    extbus.put(flags.getBit(1));
+    statusMemory.read();
+
+    ula.store(0);
+    ula.internalRead(0);
+
+    PC.internalStore();
   }
 
   /**
@@ -1319,7 +1351,31 @@ public class Architecture {
    * 1.
    */
   public void jz() {
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    memory.read();
+    statusMemory.storeIn1();
+
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+    statusMemory.storeIn0();
+
+    extbus.put(flags.getBit(0));
+    statusMemory.read();
+
+    ula.store(0);
+    ula.internalRead(0);
+
+    PC.internalStore();
   }
 
   /**
@@ -1333,7 +1389,31 @@ public class Architecture {
    * 1.
    */
   public void jnz() {
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    memory.read();
+    statusMemory.storeIn0();
+
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+    statusMemory.storeIn1();
+
+    extbus.put(flags.getBit(0));
+    statusMemory.read();
+
+    ula.store(0);
+    ula.internalRead(0);
+
+    PC.internalStore();
   }
 
   /**
