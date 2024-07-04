@@ -1,60 +1,36 @@
 package architecture;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 public class TestArchitecture {
 
-  // Uncomment the annotation below to run the architecture showing components status
-  // @Test
-  public void testShowComponentes() {
+  @Test
+  public void testSubRegMem()
+  {
+    Architecture arch =  new Architecture();
+    // making PC points to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
 
-    //a complete test (for visual purposes only).
-    //a single code as follows
-//		ldi 2
-//		store 40
-//		ldi -4
-//		point:
-//		store 41  //mem[41]=-4 (then -3, -2, -1, 0)
-//		read 40
-//		add 40    //mem[40] + mem[40]
-//		store 40  //result must be in 40
-//		read 41
-//		inc
-//		jn point
-//		end
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 100;
+    arch.getMemory().getDataList()[100] = 70;
+    arch.getExtbus().put(77);
+    arch.getRegistersList().get(0).store(); //RPG0 has 77
 
-    Architecture arch = new Architecture(true);
-    arch.getMemory().getDataList()[0] = 7;
-    arch.getMemory().getDataList()[1] = 2;
-    arch.getMemory().getDataList()[2] = 6;
-    arch.getMemory().getDataList()[3] = 40;
-    arch.getMemory().getDataList()[4] = 7;
-    arch.getMemory().getDataList()[5] = -4;
-    arch.getMemory().getDataList()[6] = 6;
-    arch.getMemory().getDataList()[7] = 41;
-    arch.getMemory().getDataList()[8] = 5;
-    arch.getMemory().getDataList()[9] = 40;
-    arch.getMemory().getDataList()[10] = 0;
-    arch.getMemory().getDataList()[11] = 40;
-    arch.getMemory().getDataList()[12] = 6;
-    arch.getMemory().getDataList()[13] = 40;
-    arch.getMemory().getDataList()[14] = 5;
-    arch.getMemory().getDataList()[15] = 41;
-    arch.getMemory().getDataList()[16] = 8;
-    arch.getMemory().getDataList()[17] = 4;
-    arch.getMemory().getDataList()[18] = 6;
-    arch.getMemory().getDataList()[19] = -1;
-    arch.getMemory().getDataList()[40] = 0;
-    arch.getMemory().getDataList()[41] = 0;
-    //now the program and the variables are stored. we can run
-    arch.controlUnitEexec();
+    arch.subRegMem();
+
+    assertEquals(7, arch.getMemory().getDataList()[100]);
+    arch.getRegistersList().get(0).read();
+    assertEquals(77, arch.getExtbus().get());
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    arch.getPC().internalRead();
+    assertEquals(33, arch.getIntbus().get());
   }
-
-  /*
-   * The following tests are for the architecture components
-   */
 
   @Test
   public void testAddRegReg() {
@@ -217,7 +193,7 @@ public class TestArchitecture {
   }
 
   @Test
-  public void testMoveRegReg() {
+  public void testMoveMemReg() {
     Architecture arch = new Architecture();
 
     // making PC points to position 30
@@ -225,27 +201,169 @@ public class TestArchitecture {
     arch.getPC().internalStore();
 
     // setting the memory values
-    arch.getMemory().getDataList()[31] = 1;
-    arch.getMemory().getDataList()[32] = 0;
+    arch.getMemory().getDataList()[31] = 100; // in the fist position we have 100 that's the address we want to move value of the register to memory
+    arch.getMemory().getDataList()[32] = 0; // in the second position we have address  that's register id
+    arch.getMemory().getDataList()[100] = 2000; //in third position we have the value that we want to move to memory
 
-    // now setting the registers values
-    arch.getExtbus().put(77);
-    arch.getRegistersList().get(0).store(); //RPG0 has 45
-    arch.getExtbus().put(109);
-    arch.getRegistersList().get(1).store(); //RPG1 has 99
+    // MOVE &100 %rpg0
+    arch.moveMemReg();
 
-    // MOVE %rpg1 %rpg0
-    arch.moveRegReg();
-
-    // testing if both REG1 and REG0 store the same value: 99
+    assertEquals(2000, arch.getMemory().getDataList()[100]);
     arch.getRegistersList().get(0).read();
-    assertEquals(109, arch.getExtbus().get());
-    arch.getRegistersList().get(1).read();
-    assertEquals(109, arch.getExtbus().get());
+    assertEquals(2000, arch.getExtbus().get());
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
     arch.getPC().internalRead();
     assertEquals(33, arch.getIntbus().get());
+  }
+
+  @Test
+  public void testMoveRegMem() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 100;
+
+    // Now setting the registers values
+    arch.getExtbus().put(77);
+    arch.getRPG().store(); // RPG0 has 77
+
+    // MOVE %rpg0 100
+    arch.moveRegMem();
+
+    // Testing if memory position 100 stores the value 77
+    assertEquals(77, arch.getMemory().getDataList()[100]);
+    // Testing if RPG0 stores the value 77
+    assertEquals(77, arch.getRPG().getData());
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    assertEquals(33, arch.getPC().getData());
+  }
+
+  @Test
+  public void testMoveRegReg() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 1;
+    arch.getMemory().getDataList()[32] = 0;
+
+    // Now setting the registers values
+    arch.getExtbus().put(77);
+    arch.getRPG().store(); //RPG0 has 77
+    arch.getExtbus().put(109);
+    arch.getRPG1().store(); //RPG1 has 109
+
+    // MOVE %rpg1 %rpg0
+    arch.moveRegReg();
+
+    // Testing if both REG1 and REG0 store the same value: 109
+    assertEquals(109, arch.getRPG().getData());
+    assertEquals(109, arch.getRPG1().getData());
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    assertEquals(33, arch.getPC().getData());
+  }
+
+  @Test
+  public void testMoveImmReg() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 101;
+    arch.getMemory().getDataList()[32] = 0;
+
+    // MOVE 101 %rpg0
+    arch.moveImmReg();
+
+    // Testing if REG0 stores the value 101
+    assertEquals(101, arch.getRPG().getData());
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    assertEquals(33, arch.getPC().getData());
+  }
+
+  @Test
+  public void testIncReg() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+
+    // Now setting the registers values
+    arch.getExtbus().put(77);
+    arch.getRPG().store(); // RPG0 has 77
+
+    // INC %rpg0
+    arch.incReg();
+
+    // Testing if RPG0 stores the value 78
+    assertEquals(78, arch.getRPG().getData());
+
+    // Testing if PC points to 2 positions after the original
+    // PC was pointing to 30; now it must be pointing to 32
+    assertEquals(32, arch.getPC().getData());
+  }
+
+  @Test
+  public void testIncMem() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+    arch.getMemory().getDataList()[100] = 2000;
+
+    // INC 100
+    arch.incMem();
+
+    // Testing if memory position 100 stores the value 2001
+    assertEquals(2001, arch.getMemory().getDataList()[100]);
+
+    // Testing if PC points to 2 positions after the original
+    // PC was pointing to 30; now it must be pointing to 32
+    assertEquals(32, arch.getPC().getData());
+  }
+
+  @Test
+  public void testJmp() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JMP 100
+    arch.jmp();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
   }
 }
