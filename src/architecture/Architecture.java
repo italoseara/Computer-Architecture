@@ -327,7 +327,7 @@ public class Architecture {
    * The method reads the register id and the memory position from the memory, in positions just after the command, and
    * subtracts the value from the register to the memory position
    * <p>
-   * 1.
+   * 1. Make by wilson
    */
   public void subRegMem() {
     PC.internalRead(); //pc -> intbus
@@ -439,6 +439,7 @@ public class Architecture {
     ula.internalRead(1); //  ula(1) -> intbus
     ula.read(1); //ula(1) -> extbus
     PC.internalStore();
+    simulationDecodeExecuteBefore(9);
     // Read the register id from the memory
     memory.read();
     ula.store(0); // storing the register id in the ula
@@ -451,12 +452,13 @@ public class Architecture {
     //here we have manipulation for store the value of extbus in the position of memory
     memory.read(); //read the memory position
     memory.store(); //store the value of extbus in the memory position
+    ula.store(1); //store the value of extbus in the ula
     ula.read(0);
     demux.setValue(extbus.get());
-    registersRead(); //read the register
-    memory.store(); //store the value of the register in the memory position
+    ula.read(1);
+    registersStore(); //read the register
     // Increment PC to point to the next command
-    //see value of all registers and memory
+    simulationDecodeExecuteAfter();
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();

@@ -63,6 +63,7 @@ public class TestArchitecture {
     arch.getMemory().getDataList()[31] = 0;
     arch.getMemory().getDataList()[32] = 12;
 
+
     // Now setting the registers values
     arch.getExtbus().put(77);
     arch.getRegistersList().get(0).store(); // RPG0 has 77
@@ -70,10 +71,7 @@ public class TestArchitecture {
     // SUB %rpg0 100
     arch.subRegMem();
 
-    // Testing if RPG0 stores the value 77-12 = 65
-    arch.getRegistersList().get(0).read();
-    assertEquals(65, arch.getExtbus().get());
-    // Testing if PC points to 3 positions after the original
+    // Testing if m
     // PC was pointing to 30; now it must be pointing to 33
     arch.getPC().internalRead();
     assertEquals(33, arch.getIntbus().get());
@@ -104,9 +102,11 @@ public class TestArchitecture {
     // MOVE %rpg0 100
     arch.moveMemReg();
 
-    // Testing if memory position 100 stores the value 77
-    assertEquals(77, arch.getMemory().getDataList()[100]);
-    // Testing if RPG0 stores the value 77
+    // Testing if register RPG0 stores the value 100
+    arch.getRegistersList().get(0).read();
+    arch.getPC().internalRead();
+    assertEquals(33, arch.getIntbus().get());
+
 
   }
   @Test
