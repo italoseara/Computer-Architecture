@@ -349,17 +349,7 @@ public class Architecture {
     ula.inc(); //ula.inc
     ula.internalRead(1); //ula(1) -> intbus
     PC.internalStore(); //pc <- intbus
-    memory.read();
-    memory.store();
-    ula.store(1);
-    ula.read(0);
-    demux.setValue(extbus.get());
-    registersRead();
-    ula.store(0);
-    ula.sub();
-    ula.read(1);
-    registersStore();
-    // Increment PC to point to the next command
+    //here we have manipulation for store the value of reg0 in the position of memory
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();
