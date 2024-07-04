@@ -139,4 +139,22 @@ public class TestArchitecture {
     // PC was pointing to 30; now it must be pointing to 32
     assertEquals(32, arch.getPC().getData());
   }
+
+  @Test
+  public void testJmp() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+
+    // JMP 100
+    arch.jmp();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
+  }
 }

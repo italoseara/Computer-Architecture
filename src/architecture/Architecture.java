@@ -199,35 +199,35 @@ public class Architecture {
     commandsList = new ArrayList<>();
 
     // Hingrid
-    commandsList.add("addRegReg");    // 0
-    commandsList.add("addMemReg");    // 1
-    commandsList.add("addRegMem");    // 2
-    commandsList.add("subRegReg");    // 3
-    commandsList.add("subMemReg");    // 4
+    commandsList.add("addRegReg");    // 0 ✓
+    commandsList.add("addMemReg");    // 1 ✓
+    commandsList.add("addRegMem");    // 2 ✓
+    commandsList.add("subRegReg");    // 3 ✓
+    commandsList.add("subMemReg");    // 4 ✓
 
     // Wilson
-    commandsList.add("subRegMem");    // 5
+    commandsList.add("subRegMem");    // 5 ✓
     commandsList.add("imulMemReg");   // 6
     commandsList.add("imulRegMem");   // 7
     commandsList.add("imulRegReg");   // 8
-    commandsList.add("moveMemReg");   // 9
+    commandsList.add("moveMemReg");   // 9 ✓
 
     // Italo
-    commandsList.add("moveRegMem");   // 10
-    commandsList.add("moveRegReg");   // 11
-    commandsList.add("moveImmReg");   // 12
-    commandsList.add("incReg");       // 13
-    commandsList.add("incMem");       // 14
+    commandsList.add("moveRegMem");   // 10 ✓
+    commandsList.add("moveRegReg");   // 11 ✓
+    commandsList.add("moveImmReg");   // 12 ✓
+    commandsList.add("incReg");       // 13 ✓
+    commandsList.add("incMem");       // 14 ✓
 
     // Luige
-    commandsList.add("jmpMem");       // 15
-    commandsList.add("jnMem");        // 16
-    commandsList.add("jzMem");        // 17
-    commandsList.add("jnzMem");       // 18
-    commandsList.add("jeqRegRegMem"); // 19
+    commandsList.add("jmp");       // 15 ✓
+    commandsList.add("jn");        // 16
+    commandsList.add("jz");        // 17
+    commandsList.add("jnz");       // 18
+    commandsList.add("jeq");       // 19
 
-    commandsList.add("jgtRegRegMem"); // 20 Italo
-    commandsList.add("jlwRegRegMem"); // 21 Italo
+    commandsList.add("jgt"); // 20 Italo
+    commandsList.add("jlw"); // 21 Italo
   }
 
   /**
@@ -761,10 +761,29 @@ public class Architecture {
    * The method reads the memory position from the memory, in positions just after the command, and
    * jumps to the memory position
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // sets the extbus value to the memory position
+   * 8. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 9. ula(0) -> intbus // moves the value from the ula to the intbus
+   * 10. pc <- intbus // jumps to the memory position
    */
   public void jmp() {
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    memory.read();
+    ula.store(0);
+    ula.internalRead(0);
+    PC.internalStore();
   }
 
   /**
