@@ -82,19 +82,18 @@ public class TestArchitecture {
 
     // Now setting the registers values
     arch.getExtbus().put(50);
-    arch.getRegistersList().get(0).store(); //RPG0 has 50
+    arch.getRPG().store(); //RPG0 has 50
 
     // ADD 20 %rpg0
     arch.addMemReg();
 
-    assertEquals(20, arch.getMemory().getDataList()[100]); // Testing if the memory stores the value 20
-    arch.getRegistersList().get(0).read();
-    assertEquals(70, arch.getExtbus().get()); // Testing if RPG0 stores the value 70 (result)
+    assertEquals(20, arch.getMemory().getDataList()[100]);
+    assertEquals(70, arch.getRPG().getData());
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
     arch.getPC().internalRead();
-    assertEquals(33, arch.getIntbus().get());
+    assertEquals(33, arch.getPC().getData());
   }
 
   @Test
@@ -112,19 +111,17 @@ public class TestArchitecture {
 
     // Now setting the registers values
     arch.getExtbus().put(30);
-    arch.getRegistersList().get(0).store(); //RPG0 has 30
+    arch.getRPG().store(); //RPG0 has 30
 
     // ADD %rpg0 20
     arch.addRegMem();
 
-    assertEquals(30, arch.getExtbus().get()); // Testing if the RPG0 stores the value 30
-    arch.getRegistersList().get(0).read();
-    assertEquals(50, arch.getMemory().getDataList()[100]); // Testing if the memory stores the value 50 (result)
+    assertEquals(30, arch.getRPG().getData());
+    assertEquals(50, arch.getMemory().getDataList()[100]);
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
-    arch.getPC().internalRead();
-    assertEquals(33, arch.getIntbus().get());
+    assertEquals(33, arch.getPC().getData());
   }
 
   @Test
@@ -141,25 +138,22 @@ public class TestArchitecture {
 
     // Now setting the registers values
     arch.getExtbus().put(77);
-    arch.getRegistersList().get(0).store();
+    arch.getRPG().store();
     arch.getExtbus().put(33);
-    arch.getRegistersList().get(1).store();
+    arch.getRPG1().store();
 
     // SUB %rpg0 %rpg1
     arch.subRegReg();
 
     // Testing if RPG0 stores the value 77
-    arch.getRegistersList().get(0).read();
-    assertEquals(77, arch.getExtbus().get());
+    assertEquals(77, arch.getRPG().getData());
 
     // Testing if RPG1 stores the value 44
-    arch.getRegistersList().get(1).read();
-    assertEquals(44, arch.getExtbus().get());
+    assertEquals(44, arch.getRPG1().getData());
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
-    arch.getPC().internalRead();
-    assertEquals(33, arch.getIntbus().get());
+    assertEquals(33, arch.getPC().getData());
   }
 
   @Test
@@ -177,19 +171,17 @@ public class TestArchitecture {
 
     // Now setting the registers values
     arch.getExtbus().put(10);
-    arch.getRegistersList().get(0).store(); // RPG0 has 10
+    arch.getRPG().store(); // RPG0 has 10
 
     // SUB 45 %rpg0
     arch.subMemReg();
 
-    assertEquals(45, arch.getMemory().getDataList()[100]); // Testing if the memory stores the value 45
-    arch.getRegistersList().get(0).read();
-    assertEquals(35, arch.getExtbus().get()); // Testing if RPG0 stores the value 35 (result)
+    assertEquals(45, arch.getMemory().getDataList()[100]);
+    assertEquals(35, arch.getRPG().getData());
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
-    arch.getPC().internalRead();
-    assertEquals(33, arch.getIntbus().get());
+    assertEquals(33, arch.getPC().getData());
   }
 
   @Test
@@ -209,13 +201,11 @@ public class TestArchitecture {
     arch.moveMemReg();
 
     assertEquals(2000, arch.getMemory().getDataList()[100]);
-    arch.getRegistersList().get(0).read();
-    assertEquals(2000, arch.getExtbus().get());
+    assertEquals(2000, arch.getRPG().getData());
 
     // Testing if PC points to 3 positions after the original
     // PC was pointing to 30; now it must be pointing to 33
-    arch.getPC().internalRead();
-    assertEquals(33, arch.getIntbus().get());
+    assertEquals(33, arch.getPC().getData());
   }
 
   @Test
