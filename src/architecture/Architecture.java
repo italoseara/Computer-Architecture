@@ -220,14 +220,14 @@ public class Architecture {
     commandsList.add("incMem");       // 14
 
     // Luige
-    commandsList.add("jmpMem");       // 15
-    commandsList.add("jnMem");        // 16
-    commandsList.add("jzMem");        // 17
-    commandsList.add("jnzMem");       // 18
-    commandsList.add("jeqRegRegMem"); // 19
+    commandsList.add("jmp");       // 15
+    commandsList.add("jn");        // 16
+    commandsList.add("jz");        // 17
+    commandsList.add("jnz");       // 18
+    commandsList.add("jeq");       // 19
 
-    commandsList.add("jgtRegRegMem"); // 20 Italo
-    commandsList.add("jlwRegRegMem"); // 21 Italo
+    commandsList.add("jgt"); // 20 Italo
+    commandsList.add("jlw"); // 21 Italo
   }
 
   /**

@@ -5,56 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class TestArchitecture {
-
-  // Uncomment the annotation below to run the architecture showing components status
-  // @Test
-  public void testShowComponentes() {
-
-    //a complete test (for visual purposes only).
-    //a single code as follows
-//		ldi 2
-//		store 40
-//		ldi -4
-//		point:
-//		store 41  //mem[41]=-4 (then -3, -2, -1, 0)
-//		read 40
-//		add 40    //mem[40] + mem[40]
-//		store 40  //result must be in 40
-//		read 41
-//		inc
-//		jn point
-//		end
-
-    Architecture arch = new Architecture(true);
-    arch.getMemory().getDataList()[0] = 7;
-    arch.getMemory().getDataList()[1] = 2;
-    arch.getMemory().getDataList()[2] = 6;
-    arch.getMemory().getDataList()[3] = 40;
-    arch.getMemory().getDataList()[4] = 7;
-    arch.getMemory().getDataList()[5] = -4;
-    arch.getMemory().getDataList()[6] = 6;
-    arch.getMemory().getDataList()[7] = 41;
-    arch.getMemory().getDataList()[8] = 5;
-    arch.getMemory().getDataList()[9] = 40;
-    arch.getMemory().getDataList()[10] = 0;
-    arch.getMemory().getDataList()[11] = 40;
-    arch.getMemory().getDataList()[12] = 6;
-    arch.getMemory().getDataList()[13] = 40;
-    arch.getMemory().getDataList()[14] = 5;
-    arch.getMemory().getDataList()[15] = 41;
-    arch.getMemory().getDataList()[16] = 8;
-    arch.getMemory().getDataList()[17] = 4;
-    arch.getMemory().getDataList()[18] = 6;
-    arch.getMemory().getDataList()[19] = -1;
-    arch.getMemory().getDataList()[40] = 0;
-    arch.getMemory().getDataList()[41] = 0;
-    //now the program and the variables are stored. we can run
-    arch.controlUnitEexec();
-  }
-
   /*
    * The following tests are for the architecture components
    */
+
   @Test
   public void testMoveRegReg() {
     Architecture arch = new Architecture();
