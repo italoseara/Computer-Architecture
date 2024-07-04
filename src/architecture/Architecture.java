@@ -417,20 +417,16 @@ public class Architecture {
     ula.internalRead(1); //ula(1) -> intbus
     PC.internalStore(); //pc <- intbus
     //here we have manipulation for store the value of extbus in the position of memory
-    memory.read();
-    memory.store();
-    registersRead();
-    memory.store();
+    memory.read(); //read the memory position
+    memory.store(); //store the value of extbus in the memory position
+    registersRead(); //read the register
+    memory.store(); //store the value of the register in the memory position
     // Increment PC to point to the next command
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();
     ula.internalRead(1);
     PC.internalStore();
-
-
-
-
   }
 
   /**
