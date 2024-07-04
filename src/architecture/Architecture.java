@@ -328,7 +328,32 @@ public class Architecture {
    * <p>
    * 1. pc -> intbus
    * 2. ula(1) <- intbus
-   *
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // read the first parameter
+   * 8. demux <- extbus // sets the demux value to the id of the register
+   * 9. registers <- extbus // this performs the internal reading of the selected register
+   * 10. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 11. pc -> intbus
+   * 12. ula(1) <- intbus
+   * 13. ula.inc
+   * 14. ula(1) -> intbus
+   * 15. ula(1) -> extbus
+   * 16. pc <- intbus // pc++ (pointing to the register id)
+   * 18. memory -> extbus // read the register id
+   * 19. memory <- extbus // sets the extbus value to the position of memory
+   * 20. memory -> read // read the value from the memory position
+   * 21. ula(1) <- extbus // Save the value of the extbus in the ula
+   * 22. ula.sub // subtract the value from the memory position to the register
+   * 23. ula(1) -> extbus // moves the value from the ula to the extbus
+   * 25. memory <- extbus // sets the extbus value to the position of memory
+   * pc -> intbus
+   * ula(1) <- intbus
+   * ula.inc
+   * ula(1) -> intbus
+   * ula(1) -> extbus
    */
   public void subRegMem() {
     PC.internalRead();
@@ -457,7 +482,6 @@ public class Architecture {
 
     memory.read(); // Get the first parameter
     memory.read(); // Get the value from the memory position
-
     ula.store(0); // Save the value of the extbus in the ula
 
     // Increment PC to point to the register id
