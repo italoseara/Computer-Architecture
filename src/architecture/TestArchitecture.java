@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class TestArchitecture {
-
   /*
    * The following tests are for the architecture components
    */
+
   @Test
   public void testMoveRegMem() {
     Architecture arch = new Architecture();
