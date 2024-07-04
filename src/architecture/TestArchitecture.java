@@ -166,7 +166,6 @@ public class TestArchitecture {
     assertEquals(32, arch.getPC().getData());
   }
 
-  // Test
   @Test
   public void testIncMem() {
     Architecture arch = new Architecture();
