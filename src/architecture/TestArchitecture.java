@@ -7,6 +7,74 @@ import org.junit.Test;
 public class TestArchitecture {
 
   @Test
+  public void testJlw() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the registers values
+    arch.getExtbus().put(1);
+    arch.getRegistersList().get(0).store(); // RPG0 has 0
+    arch.getExtbus().put(0);
+    arch.getRegistersList().get(1).store(); // RPG1 has 1
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 1;
+    arch.getMemory().getDataList()[33] = 100;
+
+    // JEQ %rpg0 %rpg1 100
+    arch.jlw();
+
+    // Testing if PC points to position 100
+    assertEquals(34, arch.getPC().getData());
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the registers values
+    arch.getExtbus().put(0);
+    arch.getRegistersList().get(0).store(); // RPG0 has 0
+    arch.getExtbus().put(0);
+    arch.getRegistersList().get(1).store(); // RPG1 has 1
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 1;
+    arch.getMemory().getDataList()[33] = 100;
+
+    // JEQ %rpg0 %rpg1 100
+    arch.jlw();
+
+    // Testing if PC points to position 100
+    assertEquals(34, arch.getPC().getData());
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the registers values
+    arch.getExtbus().put(0);
+    arch.getRegistersList().get(0).store(); // RPG0 has 0
+    arch.getExtbus().put(1);
+    arch.getRegistersList().get(1).store(); // RPG1 has 1
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 1;
+    arch.getMemory().getDataList()[33] = 100;
+
+    // JEQ %rpg0 %rpg1 100
+    arch.jlw();
+
+    // Testing if PC points to position 100
+    assertEquals(100, arch.getPC().getData());
+  }
+
+  @Test
   public void testJgt() {
     Architecture arch = new Architecture();
 
