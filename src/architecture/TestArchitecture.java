@@ -56,6 +56,30 @@ public class TestArchitecture {
    * The following tests are for the architecture components
    */
   @Test
+  public void testMoveMemReg() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 100;
+
+    // Now setting the registers values
+    arch.getExtbus().put(77);
+    arch.getRegistersList().get(0).store(); // RPG0 has 77
+
+    // MOVE %rpg0 100
+    arch.moveMemReg();
+
+    // Testing if memory position 100 stores the value 77
+    assertEquals(77, arch.getMemory().getDataList()[100]);
+    // Testing if RPG0 stores the value 77
+
+  }
+  @Test
   public void testMoveRegReg() {
     Architecture arch = new Architecture();
 

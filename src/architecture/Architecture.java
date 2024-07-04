@@ -5,6 +5,8 @@ import components.Demux;
 import components.Memory;
 import components.Register;
 import components.Ula;
+
+import javax.crypto.spec.PSource;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -393,8 +395,69 @@ public class Architecture {
    * moves the value from the memory position to the register
    * <p>
    * 1.
+   * 1.  pc -> intbus               // Load current instruction address into intbus
+   * 2.  ula(1) <- intbus           // Transfer instruction to ULA
+   * 3.  ula.inc                   // Increment PC for next instruction
+   * 4.  ula(1) -> intbus           // Send incremented address back to intbus
+   * 5.  pc <- intbus               // Store updated PC
+   *
+   * 6.  pc -> intbus               // Fetch memory address operand
+   * 7.  ula(1) <- intbus
+   * 8.  ula.inc
+   * 9.  ula(1) -> intbus
+   * 10. ula(1) -> extbus           // Put memory address on external bus
+   * 11. memory -> extbus           // Initiate memory read, value will be available on extbus next cycle
+   *
+   * 12. pc -> intbus               // Fetch register ID operand
+   * 13. ula(1) <- intbus
+   * 14. ula.inc
+   * 15. ula(1) -> intbus
+   * 16. ula(0) <- intbus           // Save register ID in ULA register 0
+   *
+   * 17. memory -> extbus           // Retrieve value from memory (now on extbus)
+   * 18. registers <- extbus        // Write value directly into the register specified by ID in ULA(0)
+   *
+   * 19. pc -> intbus               // Prepare for next instruction
+   * 20. ula(1) <- intbus
+   * 21. ula.inc
+   * 22. ula(1) -> intbus
+   * 23. pc <- intbus
    */
   public void moveMemReg() {
+    //increment pc to next instruction
+    PC.internalRead(); //pc -> intbus
+    //System.out.println("pc: " + PC.getData());
+    ula.internalStore(1); //ula(1) <- intbus
+    ula.inc(); //ula.inc
+    ula.internalRead(1); //  ula(1) -> intbus
+    ula.read(1); //ula(1) -> extbus
+    PC.internalStore(); //
+    //System.out.println("pc: " + PC.getData());
+
+
+    // Read the register id from the memory
+    memory.read();
+    ula.store(0); // storing the register id in the ula
+    //prepare for next instruction
+    PC.internalRead(); //pc -> intbus
+    ula.internalRead(1); //ula(1) <- intbus
+    ula.inc(); //ula.inc
+    ula.internalRead(1); //ula(1) -> intbus
+    PC.internalStore(); //pc <- intbus
+    //here we have manipulation for store the value of extbus in the position of memory
+    memory.read();
+    memory.store();
+    registersRead();
+    memory.store();
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
+
+
+
 
   }
 
