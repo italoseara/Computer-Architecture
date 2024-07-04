@@ -41,9 +41,9 @@ public class TestArchitecture {
     arch.getPC().internalStore();
 
     // setting the memory values
-    arch.getMemory().getDataList()[31] = 100;
-    arch.getMemory().getDataList()[32] = 0;
-    arch.getMemory().getDataList()[100] = 2000;
+    arch.getMemory().getDataList()[31] = 100; // in the fist position we have 100 that's the address we want to move value of the register to memory
+    arch.getMemory().getDataList()[32] = 0; // in the second position we have address  that's register id
+    arch.getMemory().getDataList()[100] = 2000; //in third position we have the value that we want to move to memory
 
     // MOVE &100 %rpg0
     arch.moveMemReg();
