@@ -360,7 +360,7 @@ public class Architecture {
    * 4. ula(1) -> intbus
    * 5. ula(1) -> extbus
    * 6. pc <- intbus // pc++ (pointing to the first register)
-   * 7. memory -> extbus
+   * 7. memory -> extbus // read the value forom the memory position
    * 8. memory -> extbus
    * 9. ula(0) <- extbus // waits for the value of the seconds register
    * 10. pc -> intbus
@@ -395,7 +395,7 @@ public class Architecture {
     ula.read(1);
     PC.internalStore();
 
-    // Read the first register id from the memory
+    // Read the value from the memory
     memory.read();
     memory.read();
 

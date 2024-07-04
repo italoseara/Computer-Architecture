@@ -201,7 +201,7 @@ public class TestArchitecture {
 
     // Now setting the registers values
     arch.getExtbus().put(10);
-    arch.getRegistersList().get(0).store(); //RPG0 has 10
+    arch.getRegistersList().get(0).store(); // RPG0 has 10
 
     // SUB 45 %rpg0
     arch.subMemReg();
