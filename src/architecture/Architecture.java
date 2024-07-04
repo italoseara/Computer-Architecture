@@ -349,6 +349,8 @@ public class Architecture {
     memory.read();
     memory.store();
     ula.store(1);
+    ula.read(0);
+    demux.setValue(extbus.get());
     registersRead();
     ula.store(0);
     ula.sub();
