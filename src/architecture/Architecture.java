@@ -321,7 +321,7 @@ public class Architecture {
 
   /**
    * This method implements the microprogram for
-   * sub <reg> <mem>
+   * sub <reg> <mem> -> <reg>
    * In the machine language this command number is 5
    * <p>
    * The method reads the register id and the memory position from the memory, in positions just after the command, and
@@ -330,7 +330,36 @@ public class Architecture {
    * 1.
    */
   public void subRegMem() {
-
+    PC.internalRead(); //pc -> intbus
+    //System.out.println("pc: " + PC.getData());
+    ula.internalStore(1); //ula(1) <- intbus
+    ula.inc(); //ula.inc
+    ula.internalRead(1); //  ula(1) -> intbus
+    ula.read(1); //ula(1) -> extbus
+    PC.internalStore();
+    // Read the register id from the memory
+    memory.read();
+    ula.store(0); // storing the register id in the ula
+    //prepare for next instruction
+    PC.internalRead(); //pc -> intbus
+    ula.internalRead(1); //ula(1) <- intbus
+    ula.inc(); //ula.inc
+    ula.internalRead(1); //ula(1) -> intbus
+    PC.internalStore(); //pc <- intbus
+    memory.read();
+    memory.store();
+    ula.store(1);
+    registersRead();
+    ula.store(0);
+    ula.sub();
+    ula.read(1);
+    registersStore();
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
@@ -358,7 +387,8 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void imulRegMem() {
+  public void imulRegMem()
+  {
 
   }
 

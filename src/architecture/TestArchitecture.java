@@ -51,10 +51,40 @@ public class TestArchitecture {
     //now the program and the variables are stored. we can run
     arch.controlUnitEexec();
   }
+  @Test
+  public void testSubRegMem()
+  {
+    Architecture arch = new Architecture();
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
 
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 0;
+    arch.getMemory().getDataList()[32] = 12;
+
+    // Now setting the registers values
+    arch.getExtbus().put(77);
+    arch.getRegistersList().get(0).store(); // RPG0 has 77
+
+    // SUB %rpg0 100
+    arch.subRegMem();
+
+    // Testing if RPG0 stores the value 77-12 = 65
+    arch.getRegistersList().get(0).read();
+    assertEquals(65, arch.getExtbus().get());
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    arch.getPC().internalRead();
+    assertEquals(33, arch.getIntbus().get());
+  }
   /*
    * The following tests are for the architecture components
    */
+  /*
+  * in this test we will test the method that stores a value of register in memory
+  *
+  * */
   @Test
   public void testMoveMemReg() {
     Architecture arch = new Architecture();
