@@ -394,34 +394,6 @@ public class Architecture {
    * The method reads the memory position and the register id from the memory, in positions just after the command, and
    * moves the value from the memory position to the register
    * <p>
-   * 1.
-   * 1.  pc -> intbus               // Load current instruction address into intbus
-   * 2.  ula(1) <- intbus           // Transfer instruction to ULA
-   * 3.  ula.inc                   // Increment PC for next instruction
-   * 4.  ula(1) -> intbus           // Send incremented address back to intbus
-   * 5.  pc <- intbus               // Store updated PC
-   *
-   * 6.  pc -> intbus               // Fetch memory address operand
-   * 7.  ula(1) <- intbus
-   * 8.  ula.inc
-   * 9.  ula(1) -> intbus
-   * 10. ula(1) -> extbus           // Put memory address on external bus
-   * 11. memory -> extbus           // Initiate memory read, value will be available on extbus next cycle
-   *
-   * 12. pc -> intbus               // Fetch register ID operand
-   * 13. ula(1) <- intbus
-   * 14. ula.inc
-   * 15. ula(1) -> intbus
-   * 16. ula(0) <- intbus           // Save register ID in ULA register 0
-   *
-   * 17. memory -> extbus           // Retrieve value from memory (now on extbus)
-   * 18. registers <- extbus        // Write value directly into the register specified by ID in ULA(0)
-   *
-   * 19. pc -> intbus               // Prepare for next instruction
-   * 20. ula(1) <- intbus
-   * 21. ula.inc
-   * 22. ula(1) -> intbus
-   * 23. pc <- intbus
    */
   public void moveMemReg() {
     //increment pc to next instruction
