@@ -199,28 +199,28 @@ public class Architecture {
     commandsList = new ArrayList<>();
 
     // Hingrid
-    commandsList.add("addRegReg");    // 0
-    commandsList.add("addMemReg");    // 1
-    commandsList.add("addRegMem");    // 2
-    commandsList.add("subRegReg");    // 3
-    commandsList.add("subMemReg");    // 4
+    commandsList.add("addRegReg");    // 0 ✓
+    commandsList.add("addMemReg");    // 1 ✓
+    commandsList.add("addRegMem");    // 2 ✓
+    commandsList.add("subRegReg");    // 3 ✓
+    commandsList.add("subMemReg");    // 4 ✓
 
     // Wilson
-    commandsList.add("subRegMem");    // 5
+    commandsList.add("subRegMem");    // 5 ✓
     commandsList.add("imulMemReg");   // 6
     commandsList.add("imulRegMem");   // 7
     commandsList.add("imulRegReg");   // 8
-    commandsList.add("moveMemReg");   // 9
+    commandsList.add("moveMemReg");   // 9 ✓
 
     // Italo
-    commandsList.add("moveRegMem");   // 10
-    commandsList.add("moveRegReg");   // 11
-    commandsList.add("moveImmReg");   // 12
-    commandsList.add("incReg");       // 13
-    commandsList.add("incMem");       // 14
+    commandsList.add("moveRegMem");   // 10 ✓
+    commandsList.add("moveRegReg");   // 11 ✓
+    commandsList.add("moveImmReg");   // 12 ✓
+    commandsList.add("incReg");       // 13 ✓
+    commandsList.add("incMem");       // 14 ✓
 
     // Luige
-    commandsList.add("jmp");       // 15
+    commandsList.add("jmp");       // 15 ✓
     commandsList.add("jn");        // 16
     commandsList.add("jz");        // 17
     commandsList.add("jnz");       // 18
@@ -395,10 +395,72 @@ public class Architecture {
    * The method reads the register id and the memory position from the memory, in positions just after the command, and
    * moves the value from the register to the memory position
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the register)
+   * 7. memory -> extbus // sets the extbus value to the id of the register
+   * 8. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 9. pc -> intbus
+   * 10. ula(1) <- intbus
+   * 11. ula.inc
+   * 12. ula(1) -> intbus
+   * 13. ula(1) -> extbus
+   * 14. pc <- intbus // pc++ (pointing to the memory position)
+   * 15. memory -> extbus // sets the extbus value to the memory position
+   * 16. memory <- extbus // sends the memory position and waits for the value
+   * 17. ula(0) -> extbus // moves the value from the ula to the extbus
+   * 18. demux <- extbus // sets the demux value to the id of the register
+   * 19. registers <- extbus // this performs the internal writing of the selected register
+   * 20. memory <- extbus // sends the value to the memory and stores it in the memory position
+   * 21. pc -> intbus
+   * 22. ula(1) <- intbus
+   * 23. ula.inc
+   * 24. ula(1) -> intbus
+   * 25. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void moveRegMem() {
+    // Increment PC to point to the register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the register id from the memory
+    memory.read();
+    ula.store(0); // storing the register id in the ula
+
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    memory.read(); // Get the value of the memory position
+    memory.store(); // Sends the memory position and waits for the value
+
+    // Move the value from the ula to the extbus
+    ula.read(0);
+
+    // Write the value from the ula to the selected register
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Write the value from the extbus to the memory
+    memory.store();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
@@ -415,7 +477,7 @@ public class Architecture {
    * 4. ula(1) -> intbus
    * 5. ula(1) -> extbus
    * 6. pc <- intbus // pc++ (pointing to the first register)
-   * 7. memory <- extbus // sets the extbus value to the id of the first register
+   * 7. memory -> extbus // sets the extbus value to the id of the first register
    * 8. ula(0) <- extbus // Save the value of the extbus in the ula (we call it GAMBIARRA)
    * 8. pc -> intbus
    * 9. ula(1) <- intbus
@@ -429,7 +491,7 @@ public class Architecture {
    * 17. pc -> intbus
    * 18. ula(1) <- intbus
    * 19. ula(1) -> extbus // MALABARISMO to move the value from the pc to the extbus
-   * 20. memory <- extbus // sets the extbus value to the id of the second register
+   * 20. memory -> extbus // sets the extbus value to the id of the second register
    * 21. demux <- extbus // sets the demux value to the id of the second register
    * 22. ula(0) -> extbus // moves the value from the ula to the extbus
    * 23. registers <- extbus // this performs the internal writing of the selected register
@@ -450,8 +512,7 @@ public class Architecture {
 
     // Read the register id from the memory
     memory.read();
-    ula.store(
-        0); // ????????????? for some reason the ula changes the value of the extbus, so we need to store it
+    ula.store(0); // storing the register id in the ula
 
     // Increment PC to point to the second register
     PC.internalRead();
@@ -501,10 +562,69 @@ public class Architecture {
    * The method reads the immediate value and the register id from the memory, in positions just after the command, and
    * moves the immediate value to the register
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the immediate value)
+   * 7. memory -> extbus // sets the extbus value to the immediate value
+   * 8. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 9. pc -> intbus
+   * 10. ula(1) <- intbus
+   * 11. ula.inc
+   * 12. ula(1) -> intbus
+   * 13. ula(1) -> extbus
+   * 14. pc <- intbus // pc++ (pointing to the register)
+   * 15. memory -> extbus // sets the extbus value to the id of the register
+   * 16. demux <- extbus // sets the demux value to the id of the register
+   * 17. ula(0) -> extbus // moves the value from the ula to the extbus
+   * 18. registers <- extbus // this performs the internal writing of the selected register
+   * 19. pc -> intbus
+   * 20. ula(1) <- intbus
+   * 21. ula.inc
+   * 22. ula(1) -> intbus
+   * 23. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void moveImmReg() {
+    // Increment PC to point to the immediate value
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the immediate value from the memory
+    memory.read();
+    ula.store(0); // storing the immediate value in the ula
+
+    // Increment PC to point to the register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the register id from the memory
+    memory.read();
+
+    // Select the register
+    demux.setValue(extbus.get());
+
+    // Move the immediate value that was stored in the ula to the extbus
+    ula.read(0);
+
+    // Write the value from the ula to the selected register
+    registersStore();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
@@ -515,10 +635,59 @@ public class Architecture {
    * The method reads the register id from the memory, in positions just after the command, and
    * increments the value from the register
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the register)
+   * 7. memory -> extbus // sets the extbus value to the id of the register
+   * 8. demux <- extbus // sets the demux value to the id of the register
+   * 9. registers -> extbus // this performs the internal reading of the selected register
+   * 10. ula(1) <- extbus // Save the value of the selected register in the ula
+   * 11. ula.inc // increment the value in the ula
+   * 12. ula(1) -> extbus // moves the value from the ula to the extbus
+   * 13. registers <- extbus // this performs the internal writing of the selected register
+   * 14. pc -> intbus
+   * 15. ula(1) <- intbus
+   * 16. ula.inc
+   * 17. ula(1) -> intbus
+   * 18. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void incReg() {
+    // Increment PC to point to the register
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the register id from the memory
+    memory.read();
+
+    // Select the register
+    demux.setValue(extbus.get());
+    registersRead();
+
+    // Save the value of the selected register in the ula
+    ula.store(1);
+
+    // Increment the value in the ula
+    ula.inc();
+
+    // Move the value from the ula to the extbus
+    ula.read(1);
+
+    // Write the value from the ula to the selected register
+    registersStore();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
@@ -529,10 +698,59 @@ public class Architecture {
    * The method reads the memory position from the memory, in positions just after the command, and
    * increments the value from the memory position
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // sets the extbus value to the memory position
+   * 8. memory <- extbus // sends the memory position and waits for the value
+   * 9. memory -> extbus // sets the extbus value to the memory position
+   * 10. ula(1) <- extbus // moves the value from the memory to the ula
+   * 11. ula.inc // increment the value in the ula
+   * 12. ula(1) -> extbus // moves the value from the ula to the extbus
+   * 13. memory <- extbus // sends the value to the memory and stores it in the memory position
+   * 14. pc -> intbus
+   * 15. ula(1) <- intbus
+   * 16. ula.inc
+   * 17. ula(1) -> intbus
+   * 18. pc <- intbus // pc++ (pointing to the next command) :D
    */
   public void incMem() {
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    // Read the memory position from the memory
+    memory.read();
+    memory.store();
+
+    // Read the value from the memory position
+    memory.read();
+
+    // Move the value from the memory to the ula
+    ula.store(1);
+
+    // Increment the value in the ula
+    ula.inc();
+
+    // Move the value from the ula to the extbus
+    ula.read(1);
+
+    // Write the value from the ula to the memory
+    memory.store();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
   }
 
   /**
@@ -543,10 +761,29 @@ public class Architecture {
    * The method reads the memory position from the memory, in positions just after the command, and
    * jumps to the memory position
    * <p>
-   * 1.
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // sets the extbus value to the memory position
+   * 8. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 9. ula(0) -> intbus // moves the value from the ula to the intbus
+   * 10. pc <- intbus // jumps to the memory position
    */
   public void jmp() {
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
 
+    memory.read();
+    ula.store(0);
+    ula.internalRead(0);
+    PC.internalStore();
   }
 
   /**
