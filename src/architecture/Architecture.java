@@ -5,13 +5,12 @@ import components.Demux;
 import components.Memory;
 import components.Register;
 import components.Ula;
-
-import javax.crypto.spec.PSource;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 //teste de branch
 public class Architecture {
 
@@ -367,9 +366,8 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void imulMemReg()
-  {
-      /*This function implements multiplication between two numbers*/
+  public void imulMemReg() {
+    /*This function implements multiplication between two numbers*/
   }
 
   /**
@@ -382,8 +380,7 @@ public class Architecture {
    * <p>
    * 1.
    */
-  public void imulRegMem()
-  {
+  public void imulRegMem() {
 
   }
 
@@ -395,7 +392,6 @@ public class Architecture {
    * The method reads the two register ids (<reg1> and <reg2>) from the memory, in positions just after the command, and
    * multiplies the value from the <reg1> register to the <reg2> register
    * <p>
-   *
    */
   public void imulRegReg() {
       /*
@@ -419,36 +415,60 @@ public class Architecture {
    * The method reads the memory position and the register id from the memory, in positions just after the command, and
    * moves the value from the memory position to the register
    * <p>
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   * 3. ula.inc
+   * 4. ula(1) -> intbus
+   * 5. ula(1) -> extbus
+   * 6. pc <- intbus // pc++ (pointing to the memory position)
+   * 7. memory -> extbus // read the first parameter
+   * 8. memory -> extbus // read the value from the memory position
+   * 9. ula(0) <- extbus // Save the value of the extbus in the ula
+   * 10. pc -> intbus
+   * 11. ula(1) <- intbus
+   * 12. ula.inc
+   * 13. ula(1) -> intbus
+   * 14. pc <- intbus // pc++ (pointing to the register id)
+   * 15. memory -> extbus // read the register id
+   * 16. demux <- extbus // sets the demux value to the id of the register
+   * 17. ula(0) -> extbus // moves the value from the ula to the extbus
+   * 18. registers -> extbus // this performs the internal reading of the selected register
+   * 19. ula(0) <- extbus // Save the value of the selected register in the ula
+   * 20. pc -> intbus
+   * 21. ula(1) <- intbus
+   * 22. ula.inc
+   * 23. ula(1) -> intbus
+   * 24. pc <- intbus // pc++ (pointing to the memory position)
    */
   public void moveMemReg() {
-    //increment pc to next instruction
-    PC.internalRead(); //pc -> intbus
-    //System.out.println("pc: " + PC.getData());
-    ula.internalStore(1); //ula(1) <- intbus
-    ula.inc(); //ula.inc
-    ula.internalRead(1); //  ula(1) -> intbus
-    ula.read(1); //ula(1) -> extbus
-    PC.internalStore();
-    simulationDecodeExecuteBefore(9);
-    // Read the register id from the memory
-    memory.read();
-    ula.store(0); // storing the register id in the ula
-    //prepare for next instruction
-    PC.internalRead(); //pc -> intbus
-    ula.internalRead(1); //ula(1) <- intbus
-    ula.inc(); //ula.inc
-    ula.internalRead(1); //ula(1) -> intbus
-    PC.internalStore(); //pc <- intbus
-    //here we have manipulation for store the value of extbus in the position of memory
-    memory.read(); //read the memory position
-    memory.store(); //store the value of extbus in the memory position
-    ula.store(1); //store the value of extbus in the ula
-    ula.read(0);
-    demux.setValue(extbus.get());
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
     ula.read(1);
-    registersStore(); //read the register
-    // Increment PC to point to the next command
-    simulationDecodeExecuteAfter();
+    PC.internalStore();
+
+    memory.read(); // Get the first parameter
+    memory.read(); // Get the value from the memory position
+
+    ula.store(0); // Save the value of the extbus in the ula
+
+    // Increment PC to point to the register id
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    memory.read(); // Get the register id
+
+    demux.setValue(extbus.get()); // Set the demux value to the id of the register
+    ula.read(0); // Move the value from the ula to the extbus
+    registersStore(); // Write the value from the extbus to the selected register
+
+    // Increment PC to point to the memory position
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();
