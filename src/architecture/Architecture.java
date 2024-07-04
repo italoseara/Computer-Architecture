@@ -337,6 +337,9 @@ public class Architecture {
     ula.internalRead(1); //  ula(1) -> intbus
     ula.read(1); //ula(1) -> extbus
     PC.internalStore();
+//    for(Register r : registersList){
+//      System.out.println(r.getRegisterName() + ": " + r.getData());
+//    }
     // Read the register id from the memory
     memory.read();
     ula.store(0); // storing the register id in the ula
@@ -435,10 +438,7 @@ public class Architecture {
     ula.inc(); //ula.inc
     ula.internalRead(1); //  ula(1) -> intbus
     ula.read(1); //ula(1) -> extbus
-    PC.internalStore(); //
-    //System.out.println("pc: " + PC.getData());
-
-
+    PC.internalStore();
     // Read the register id from the memory
     memory.read();
     ula.store(0); // storing the register id in the ula
@@ -451,9 +451,12 @@ public class Architecture {
     //here we have manipulation for store the value of extbus in the position of memory
     memory.read(); //read the memory position
     memory.store(); //store the value of extbus in the memory position
+    ula.read(0);
+    demux.setValue(extbus.get());
     registersRead(); //read the register
     memory.store(); //store the value of the register in the memory position
     // Increment PC to point to the next command
+    //see value of all registers and memory
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();
@@ -565,6 +568,8 @@ public class Architecture {
     ula.inc();
     ula.internalRead(1);
     PC.internalStore();
+
+
   }
 
   /**
