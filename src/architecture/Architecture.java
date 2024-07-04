@@ -326,33 +326,39 @@ public class Architecture {
    * The method reads the register id and the memory position from the memory, in positions just after the command, and
    * subtracts the value from the register to the memory position
    * <p>
-   * 1. Make by wilson
+   * 1. pc -> intbus
+   * 2. ula(1) <- intbus
+   *
    */
   public void subRegMem() {
-    PC.internalRead(); //pc -> intbus
-    //System.out.println("pc: " + PC.getData());
-    ula.internalStore(1); //ula(1) <- intbus
-    ula.inc(); //ula.inc
-    ula.internalRead(1); //  ula(1) -> intbus
-    ula.read(1); //ula(1) -> extbus
-    PC.internalStore();
-//    for(Register r : registersList){
-//      System.out.println(r.getRegisterName() + ": " + r.getData());
-//    }
-    // Read the register id from the memory
-    memory.read();
-    ula.store(0); // storing the register id in the ula
-    //prepare for next instruction
-    PC.internalRead(); //pc -> intbus
-    ula.internalRead(1); //ula(1) <- intbus
-    ula.inc(); //ula.inc
-    ula.internalRead(1); //ula(1) -> intbus
-    PC.internalStore(); //pc <- intbus
-    //here we have manipulation for store the value of reg0 in the position of memory
     PC.internalRead();
     ula.internalStore(1);
     ula.inc();
     ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+    memory.read();
+    demux.setValue(extbus.get());
+    registersRead();
+    ula.store(0);
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+    memory.read();
+    memory.store();
+    memory.read();
+    ula.store(1);
+    ula.sub();
+    ula.read(1);
+    memory.store();
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
     PC.internalStore();
   }
 
