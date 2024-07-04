@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 //teste de branch
@@ -1858,12 +1857,15 @@ public class Architecture {
     } else {
       instruction = "END";
     }
-    if (hasOperands(instruction)) {
-      parameter = memory.getDataList()[PC.getData() + 1];
-      System.out.println("Instruction: " + instruction + " " + parameter);
-    } else {
-      System.out.println("Instruction: " + instruction);
+
+    int operands = getOperandSize(instruction);
+    System.out.print("Instruction: " + instruction);
+    for (int i = 0; i < operands; i++) {
+      parameter = memory.getDataList()[PC.getData() + i + 1];
+      System.out.print(" " + parameter);
     }
+    System.out.println();
+
     if ("read".equals(instruction)) {
       System.out.println("memory[" + parameter + "]=" + memory.getDataList()[parameter]);
     }
@@ -1920,10 +1922,21 @@ public class Architecture {
    * NOT TESTED!!!!!
    *
    * @param instruction the instruction to be executed
-   * @return true if the instruction has operands, false otherwise
+   * @return the number of operands
    */
-  private boolean hasOperands(String instruction) {
-    return true; // All instructions have operands
+  private int getOperandSize(String instruction) {
+    if (instruction.equals("END")) {
+      return 0;
+    }
+
+    int operands = 0;
+    for (int i = 0; i < instruction.length(); i++) {
+      // check if the character is a capital letter
+      if (Character.isUpperCase(instruction.charAt(i))) {
+        operands++;
+      }
+    }
+    return operands;
   }
 
   public static void main(String[] args) throws IOException {
