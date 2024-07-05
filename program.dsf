@@ -1,3 +1,3 @@
-move 100 %RPG0
-move 50 %RPG1
-add %RPG0 %RPG1
+move 50 %RPG0
+move 20 %RPG1
+imul %RPG0 %RPG1

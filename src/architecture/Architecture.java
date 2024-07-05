@@ -70,6 +70,67 @@ public class Architecture {
     demux = new Demux(); //this bus is used only for multiple register operations
 
     fillCommandsList();
+
+    implementMultiplication();
+  }
+
+  private void implementMultiplication() {
+    // Variables
+    int x = 127;
+    int y = 126;
+    int i = 125;
+    int laco = 113;
+
+    memory.getDataList()[x] = 0;
+    memory.getDataList()[y] = 0;
+    memory.getDataList()[i] = 0;
+
+    // move %RPG0 x
+    memory.getDataList()[98] = 10;
+    memory.getDataList()[99] = 0;
+    memory.getDataList()[100] = x;
+
+    // move %RPG1 y
+    memory.getDataList()[101] = 10;
+    memory.getDataList()[102] = 1;
+    memory.getDataList()[103] = y;
+
+    // move 0 %RPG0
+    memory.getDataList()[104] = 12;
+    memory.getDataList()[105] = 0;
+    memory.getDataList()[106] = 0;
+
+    // move 0 %RPG1
+    memory.getDataList()[107] = 12;
+    memory.getDataList()[108] = 0;
+    memory.getDataList()[109] = 1;
+
+    // add x %RPG0
+    memory.getDataList()[110] = 1; // laco:
+    memory.getDataList()[111] = x;
+    memory.getDataList()[112] = 0;
+
+    // inc %RPG1
+    memory.getDataList()[113] = 13;
+    memory.getDataList()[114] = 1;
+
+    // move y i
+    memory.getDataList()[115] = 23;
+    memory.getDataList()[116] = y;
+    memory.getDataList()[117] = i;
+
+    // sub %RPG1 i
+    memory.getDataList()[118] = 5;
+    memory.getDataList()[119] = 1;
+    memory.getDataList()[120] = i;
+
+    // jn laco
+    memory.getDataList()[121] = 16;
+    memory.getDataList()[122] = laco;
+
+    // jmp back
+    memory.getDataList()[123] = 15;
+    memory.getDataList()[124] = 0; // return address
   }
 
   /**
@@ -229,6 +290,10 @@ public class Architecture {
 
     commandsList.add("jgt"); // 20 ✓
     commandsList.add("jlw"); // 21 ✓
+
+    // Aditional commands
+    commandsList.add("moveImmMem"); // 22 ✓
+    commandsList.add("moveMemMem"); // 23 ✓
   }
 
   /**
@@ -818,16 +883,6 @@ public class Architecture {
    * <p>
    */
   public void imulRegReg() {
-      /*
-      this function implements multiplication with two registers
-      * */
-    // Increment PC to point to the first register
-    PC.internalRead();
-    ula.internalStore(1);
-    ula.inc();
-    ula.internalRead(1);
-    ula.read(1);
-    PC.internalStore();
 
   }
 
@@ -975,6 +1030,47 @@ public class Architecture {
     PC.internalStore();
   }
 
+  public void moveMemMem() {
+    // Increment PC to point to the first memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the first memory position
+    memory.read();
+    memory.read();
+
+    ula.store(0); // Save the value of the first memory position in the ula
+
+    // Increment PC to point to the second memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the second memory position
+    memory.read();
+    memory.store();
+
+    // Move the value from the ula to the extbus
+    ula.read(0);
+
+    // Write the value from the extbus to the memory
+    memory.store();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
+  }
+
   /**
    * This method implements the microprogram for
    * move <reg1> <reg2>
@@ -1064,8 +1160,6 @@ public class Architecture {
     ula.inc();
     ula.internalRead(1);
     PC.internalStore();
-
-
   }
 
   /**
@@ -1132,6 +1226,47 @@ public class Architecture {
 
     // Write the value from the ula to the selected register
     registersStore();
+
+    // Increment PC to point to the next command
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    PC.internalStore();
+  }
+
+  public void moveImmMem() {
+    // Increment PC to point to the immediate value
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the immediate value from the memory
+    memory.read();
+    ula.store(0); // storing the immediate value in the ula
+
+    // Increment PC to point to the memory position
+    PC.internalRead();
+    ula.internalStore(1);
+    ula.inc();
+    ula.internalRead(1);
+    ula.read(1);
+    PC.internalStore();
+
+    // Read the memory position from the memory
+    memory.read();
+
+    // Prepare the memory to store the immediate value
+    memory.store();
+
+    // Move the immediate value that was stored in the ula to the extbus
+    ula.read(0);
+
+    // Write the value from the ula to the memory
+    memory.store();
 
     // Increment PC to point to the next command
     PC.internalRead();
@@ -1829,6 +1964,12 @@ public class Architecture {
       case 21:
         jlw();
         break;
+      case 22:
+        moveImmMem();
+        break;
+      case 23:
+        moveMemMem();
+        break;
       default:
         halt = true;
         break;
@@ -1878,12 +2019,12 @@ public class Architecture {
   private void simulationDecodeExecuteAfter() {
     String instruction;
     System.out.println("-----------AFTER Decode and Execute phases--------------");
-    System.out.println("Internal Bus 1: " + intbus.get());
-    System.out.println("Internal Bus 2: " + intbus.get());
-    System.out.println("External Bus 1: " + extbus.get());
+    System.out.println("Internal Bus: " + intbus.get());
+    System.out.println("External Bus: " + extbus.get());
     for (Register r : registersList) {
       System.out.println(r.getRegisterName() + ": " + r.getData());
     }
+
     Scanner entrada = new Scanner(System.in);
     System.out.println("Press <Enter>");
     String mensagem = entrada.nextLine();
@@ -1936,7 +2077,7 @@ public class Architecture {
         operands++;
       }
     }
-    return operands;
+    return Math.max(1, operands); // at least one
   }
 
   public static void main(String[] args) throws IOException {

@@ -5,6 +5,56 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class TestArchitecture {
+  @Test
+  public void testMoveMemMem() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 100;
+    arch.getMemory().getDataList()[32] = 101;
+    arch.getMemory().getDataList()[100] = 2000;
+    arch.getMemory().getDataList()[101] = 0;
+
+    // MOVE 100 101
+    arch.moveMemMem();
+
+    // Testing if memory position 101 stores the value 2000
+    assertEquals(2000, arch.getMemory().getDataList()[101]);
+
+    // Testing if memory position 100 stores the value 2000
+    assertEquals(2000, arch.getMemory().getDataList()[100]);
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    assertEquals(33, arch.getPC().getData());
+  }
+
+  @Test
+  public void testMoveImmMem() {
+    Architecture arch = new Architecture();
+
+    // Making PC point to position 30
+    arch.getIntbus().put(30);
+    arch.getPC().internalStore();
+
+    // Setting the memory values
+    arch.getMemory().getDataList()[31] = 77;
+    arch.getMemory().getDataList()[32] = 100;
+
+    // MOVE 77 100
+    arch.moveImmMem();
+
+    // Testing if memory position 100 stores the value 77
+    assertEquals(77, arch.getMemory().getDataList()[100]);
+
+    // Testing if PC points to 3 positions after the original
+    // PC was pointing to 30; now it must be pointing to 33
+    assertEquals(33, arch.getPC().getData());
+  }
 
   @Test
   public void testJlw() {

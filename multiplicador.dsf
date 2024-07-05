@@ -1,0 +1,15 @@
+x
+y
+i
+move 50 %RPG0
+move 2 %RPG1
+move %RPG0 x
+move %RPG1 y
+move 0 %RPG0
+move 0 %RPG1
+laco:
+add x %RPG0
+inc %RPG1
+move y i
+sub %RPG1 i
+jn laco

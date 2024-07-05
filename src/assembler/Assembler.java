@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Assembler {
   private ArrayList<String> lines;
@@ -20,6 +19,8 @@ public class Assembler {
   private final ArrayList<String> labels;
   private final ArrayList<Integer> labelsAdresses;
   private final ArrayList<String> variables;
+
+  private final int reserved = 40; // Reserved for `imul` command
 
   public Assembler() {
     lines = new ArrayList<>();
@@ -104,7 +105,6 @@ public class Assembler {
   public void parse() {
     for (String s : lines) {
       String[] tokens = s.split(" ");
-
       if (findCommandNumber(tokens) >= 0) { // The line is a command
         processCommand(tokens);
       } else { // The line is not a command: so, it can be a variable or a label
@@ -136,13 +136,13 @@ public class Assembler {
 
     objProgram.add(Integer.toString(commandNumber));
     if (!parameter.isEmpty()) {
-      objProgram.add(parameter);
+      objProgram.add(parameter.replace("&", ""));
     }
     if (!parameter2.isEmpty()) {
-      objProgram.add(parameter2);
+      objProgram.add(parameter2.replace("&", ""));
     }
     if (!parameter3.isEmpty()) {
-      objProgram.add(parameter3);
+      objProgram.add(parameter3.replace("&", ""));
     }
   }
 
@@ -183,11 +183,11 @@ public class Assembler {
     String p1 = tokens[1];
     String p2 = tokens[2];
 
-    if ((p1.startsWith("%")) && (p2.startsWith("%"))) {
+    if (p1.startsWith("%") && p2.startsWith("%")) {
       return commands.indexOf("addRegReg");
-    } else if ((p1.startsWith("&")) && (p2.startsWith("%"))) {
+    } else if ((p1.startsWith("&") || isVariable(p1)) && p2.startsWith("%")) {
       return commands.indexOf("addMemReg");
-    } else if ((p1.startsWith("%")) && (p2.startsWith("&"))) {
+    } else if (p1.startsWith("%") && (p2.startsWith("&") || isVariable(p2))) {
       return commands.indexOf("addRegMem");
     }
 
@@ -205,11 +205,11 @@ public class Assembler {
     String p1 = tokens[1];
     String p2 = tokens[2];
 
-    if ((p1.startsWith("%")) && (p2.startsWith("%"))) {
+    if (p1.startsWith("%") && p2.startsWith("%")) {
       return commands.indexOf("subRegReg");
-    } else if ((p1.startsWith("&")) && (p2.startsWith("%"))) {
+    } else if ((p1.startsWith("&") || isVariable(p1)) && p2.startsWith("%")) {
       return commands.indexOf("subMemReg");
-    } else if ((p1.startsWith("%")) && (p2.startsWith("&"))) {
+    } else if (p1.startsWith("%") && (p2.startsWith("&") || isVariable(p2))) {
       return commands.indexOf("subRegMem");
     }
 
@@ -227,11 +227,11 @@ public class Assembler {
     String p1 = tokens[1];
     String p2 = tokens[2];
 
-    if ((p1.startsWith("%")) && (p2.startsWith("%"))) {
+    if (p1.startsWith("%") && p2.startsWith("%")) {
       return commands.indexOf("imulRegReg");
-    } else if ((p1.startsWith("&")) && (p2.startsWith("%"))) {
+    } else if ((p1.startsWith("&") || isVariable(p1)) && p2.startsWith("%")) {
       return commands.indexOf("imulMemReg");
-    } else if ((p1.startsWith("%")) && (p2.startsWith("&"))) {
+    } else if (p1.startsWith("%") && (p2.startsWith("&") || isVariable(p2))) {
       return commands.indexOf("imulRegMem");
     }
 
@@ -250,7 +250,7 @@ public class Assembler {
 
     if (p1.startsWith("%")) {
       return commands.indexOf("incReg");
-    } else if (p1.startsWith("&")) {
+    } else if (p1.startsWith("&") || isVariable(p1)) {
       return commands.indexOf("incMem");
     }
 
@@ -268,17 +268,19 @@ public class Assembler {
     String p1 = tokens[1];
     String p2 = tokens[2];
 
-    if ((p1.startsWith("%")) && (p2.startsWith("%"))) {
+    if (p1.startsWith("%") && p2.startsWith("%")) {
       return commands.indexOf("moveRegReg");
-    } else if ((p1.startsWith("&")) && (p2.startsWith("%"))) {
+    } else if ((p1.startsWith("&") || isVariable(p1)) && p2.startsWith("%")) {
       return commands.indexOf("moveMemReg");
-    } else if ((p1.startsWith("%")) && (p2.startsWith("&"))) {
+    } else if (p1.startsWith("%") && (p2.startsWith("&") || isVariable(p2))) {
       return commands.indexOf("moveRegMem");
+    } else if ((p1.startsWith("&") || isVariable(p1)) && (p2.startsWith("&") || isVariable(p2))) {
+      return commands.indexOf("moveMemMem");
     } else if (p2.startsWith("%")) {
       return commands.indexOf("moveImmReg");
+    } else {
+      return commands.indexOf("moveImmMem");
     }
-
-    return -1;
   }
 
   /**
@@ -331,7 +333,7 @@ public class Assembler {
    * and decreases (creating a stack)
    */
   protected void replaceAllVariables() {
-    int position = arch.getMemorySize() - 1; //starting from the end of the memory
+    int position = arch.getMemorySize() - 1 - reserved; //the last position in the memory
     for (String var : this.variables) { //scanning all variables
       replaceVariable(var, position);
       position--;
@@ -361,13 +363,13 @@ public class Assembler {
   protected void replaceLabels() {
     int i = 0;
     for (String label : labels) { //searching all labels
-      label = "&" + label;
       int labelPointTo = labelsAdresses.get(i);
       int lineNumber = 0;
       for (String l : execProgram) {
         if (l.equals(label)) {//this label must be replaced by the address
           String newLine = Integer.toString(labelPointTo); // the address
           execProgram.set(lineNumber, newLine);
+          objProgram.set(lineNumber, "&" + newLine);
         }
         lineNumber++;
       }
@@ -385,12 +387,13 @@ public class Assembler {
    * @param position the address of the variable
    */
   protected void replaceVariable(String var, int position) {
-    var = "&" + var;
     int i = 0;
     for (String s : execProgram) {
       if (s.equals(var)) {
         s = Integer.toString(position);
         execProgram.set(i, s);
+        objProgram.set(i, "&" + s);
+        System.out.println("Variable " + var + " found at position " + i + " and replaced by " + s);
       }
       i++;
     }
@@ -405,7 +408,7 @@ public class Assembler {
     System.out.println("Checking labels and variables");
     for (String line : objProgram) {
       boolean found = false;
-      if (line.startsWith("&")) { //if starts with "&", it is a label or a variable
+      if (line.startsWith("$")) { //if starts with "&", it is a label or a variable
         line = line.substring(1);
         if (labels.contains(line)) {
           found = true;
@@ -439,6 +442,10 @@ public class Assembler {
       i++;
     }
     return -1;
+  }
+
+  private boolean isVariable(String token) {
+    return variables.contains(token);
   }
 
   public static void main(String[] args) throws IOException {
