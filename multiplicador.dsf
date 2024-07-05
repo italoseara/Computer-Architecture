@@ -1,8 +1,8 @@
 x
 y
 i
-move 50 %RPG0
-move 2 %RPG1
+move 25 %RPG0
+move 4 %RPG1
 move %RPG0 x
 move %RPG1 y
 move 0 %RPG0

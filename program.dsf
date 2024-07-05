@@ -1,3 +1,13 @@
-move 50 %RPG0
-move 20 %RPG1
-imul %RPG0 %RPG1
+temp
+cur
+move 1 %RPG0
+move 10 %RPG1
+move 0 %RPG2
+move %RPG0 cur
+laco:
+add cur %RPG2
+inc cur
+move cur temp
+sub %RPG1 temp
+jnz laco
+add cur %RPG2

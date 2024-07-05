@@ -2081,7 +2081,7 @@ public class Architecture {
   }
 
   public static void main(String[] args) throws IOException {
-    Architecture arch = new Architecture(true);
+    Architecture arch = new Architecture(false);
     arch.readExec("program");
     arch.controlUnitEexec();
   }
